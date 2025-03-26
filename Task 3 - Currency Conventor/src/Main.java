@@ -1,50 +1,60 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
-class CurrencyConverter {
-    private final HashMap<String, Double> exchangeRates;
+class ExchangeService {
+    private final Map<String, Double> rates;
 
-    public CurrencyConverter() {
-        exchangeRates = new HashMap<>();
-        exchangeRates.put("USD", 1.0);
-        exchangeRates.put("EUR", 0.91);
-        exchangeRates.put("INR", 83.5);
-        exchangeRates.put("GBP", 0.78);
-        exchangeRates.put("JPY", 149.3);
+    public ExchangeService() {
+        // Using TreeMap instead of HashMap (ensures sorted keys)
+        rates = new TreeMap<>();
+        rates.put("USD", 1.0);
+        rates.put("EUR", 0.91);
+        rates.put("INR", 83.5);
+        rates.put("GBP", 0.78);
+        rates.put("JPY", 149.3);
     }
 
-    public double convert(String from, String to, double amount) {
-        if (exchangeRates.containsKey(from) && exchangeRates.containsKey(to)) {
-            return (amount / exchangeRates.get(from)) * exchangeRates.get(to);
-        } else {
-            throw new IllegalArgumentException("Invalid currency code!");
+    // Checks if the currency is valid
+    private boolean isCurrencyAvailable(String currency) {
+        return rates.containsKey(currency);
+    }
+
+    // Convert between two currencies
+    public double convertCurrency(String from, String to, double amount) throws IllegalArgumentException {
+        if (!isCurrencyAvailable(from) || !isCurrencyAvailable(to)) {
+            throw new IllegalArgumentException("Invalid currency code! Please use valid currency names.");
         }
+        return (amount / rates.get(from)) * rates.get(to);
     }
 }
 
- class CurrencyConverterOOP {
+ class CurrencyExchangeApp {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        CurrencyConverter converter = new CurrencyConverter();
-
-        System.out.print("Enter base currency (e.g., USD, INR): ");
-        String base = scanner.next().toUpperCase();
-
-        System.out.print("Enter target currency (e.g., USD, INR): ");
-        String target = scanner.next().toUpperCase();
-
-        System.out.print("Enter amount: ");
-        double amount = scanner.nextDouble();
+        ExchangeService exchangeService = new ExchangeService();
 
         try {
-            double convertedAmount = converter.convert(base, target, amount);
-            System.out.printf("Converted Amount: %.2f %s%n", convertedAmount, target);
+            System.out.print("Enter source currency (e.g., USD, INR): ");
+            String baseCurrency = scanner.next().toUpperCase();
+
+            System.out.print("Enter destination currency (e.g., EUR, GBP): ");
+            String targetCurrency = scanner.next().toUpperCase();
+
+            System.out.print("Enter the amount to convert: ");
+            double inputAmount = scanner.nextDouble();
+
+            double convertedValue = exchangeService.convertCurrency(baseCurrency, targetCurrency, inputAmount);
+            System.out.printf("Converted Amount: %.2f %s%n", convertedValue, targetCurrency);
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println("An error occurred. Please check your inputs.");
+        } finally {
+            scanner.close();
         }
-
-        scanner.close();
     }
 }
+
